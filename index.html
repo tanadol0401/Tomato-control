@@ -213,7 +213,7 @@
     el.style.color = color;
   }
 
-  // ส่งทั้ง 4 field พร้อมกัน (เว้น 16 วิ ต่อตัว เพราะ ThingSpeak limit 15 วิ)
+  // ส่งทั้ง 4 field พร้อมกันใน 1 request เดียว (เร็ว ~1 วิ)
   let allButtonsLocked = false;
   function sendAll(value) {
     if (allButtonsLocked) {
@@ -223,34 +223,26 @@
     const key = document.getElementById("apikey").value.trim();
     if (!key) { setStatus("❌ กรุณาใส่ Write API Key", "#f85149"); return; }
 
-    const fields = [4, 5, 6, 7];
     const actionLabel = value === 5 ? "เปิดทั้งหมด 🟢" : "ปิดทั้งหมด 🔴";
     allButtonsLocked = true;
-    setAllProgress(`🚀 เริ่ม ${actionLabel}...`, "#f5a623");
+    setAllProgress(`🚀 กำลัง ${actionLabel}...`, "#f5a623");
 
-    fields.forEach((fieldNum, i) => {
-      setTimeout(() => {
-        fetch(`https://api.thingspeak.com/update?api_key=${key}&field${fieldNum}=${value}`)
-          .then(r => r.text())
-          .then(res => {
-            const time = new Date().toLocaleTimeString('th-TH');
-            if (res === "0") {
-              setAllProgress(`❌ [${time}] field${fieldNum} ส่งไม่สำเร็จ`, "#f85149");
-            } else {
-              setAllProgress(`✅ [${time}] field${fieldNum} (${i+1}/${fields.length}) สำเร็จ`, "#73bf69");
-              updateState(fieldNum, value);
-            }
-            if (i === fields.length - 1) {
-              allButtonsLocked = false;
-              setTimeout(() => setAllProgress(`✅ ${actionLabel} เสร็จสมบูรณ์!`, "#73bf69"), 500);
-            }
-          })
-          .catch(e => {
-            setAllProgress(`❌ Error field${fieldNum}: ${e}`, "#f85149");
-            if (i === fields.length - 1) allButtonsLocked = false;
-          });
-      }, i * 16000); // เว้น 16 วินาทีต่อ field
-    });
+    fetch(`https://api.thingspeak.com/update?api_key=${key}&field4=${value}&field5=${value}&field6=${value}&field7=${value}`)
+      .then(r => r.text())
+      .then(res => {
+        const time = new Date().toLocaleTimeString('th-TH');
+        allButtonsLocked = false;
+        if (res === "0") {
+          setAllProgress(`❌ [${time}] ส่งไม่สำเร็จ (รอ 15 วิแล้วลองใหม่)`, "#f85149");
+        } else {
+          setAllProgress(`✅ [${time}] ${actionLabel} สำเร็จทั้ง 4 relay! Entry: ${res}`, "#73bf69");
+          [4, 5, 6, 7].forEach(f => updateState(f, value));
+        }
+      })
+      .catch(e => {
+        allButtonsLocked = false;
+        setAllProgress(`❌ Error: ${e}`, "#f85149");
+      });
   }
 
   function setAllProgress(msg, color) {

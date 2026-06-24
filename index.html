@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background: #181b1f;
+      color: white;
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+    label { display: block; margin-top: 14px; margin-bottom: 8px; color: #aaa; font-size: 13px; }
+    input {
+      width: 100%;
+      padding: 9px 10px;
+      background: #2c2f35;
+      border: 1px solid #444;
+      color: white;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    .key-row { display: flex; gap: 8px; align-items: center; }
+    .key-row input { flex: 1; }
+    .btn-save {
+      padding: 9px 14px;
+      background: #1e6fbf;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    #key-status { font-size: 12px; color: #f5a623; margin-top: 5px; min-height: 16px; }
+    .divider { border: none; border-top: 1px solid #333; margin: 18px 0; }
+
+    .relay-card {
+      background: #222426;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .relay-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .relay-name { font-size: 15px; font-weight: bold; }
+    .relay-field { font-size: 11px; color: #555; }
+    .relay-state {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+    .state-on  { background: #1a3d2b; color: #1a9e4a; border: 1px solid #1a9e4a; }
+    .state-off { background: #2c1f1f; color: #c0392b; border: 1px solid #c0392b; }
+    .state-idle{ background: #2c2f35; color: #666; border: 1px solid #444; }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .btn-toggle {
+      padding: 14px 8px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+      transition: opacity 0.15s;
+    }
+    .btn-toggle:active { opacity: 0.7; }
+    .btn-on  { background: #1a9e4a; color: white; }
+    .btn-off { background: #c0392b; color: white; }
+
+    #status { margin-top: 8px; font-size: 13px; min-height: 18px; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <label>🔑 Write API Key</label>
+  <div class="key-row">
+    <input type="text" id="apikey" placeholder="ใส่ Write API Key">
+    <button class="btn-save" onclick="saveKey()">💾 บันทึก</button>
+  </div>
+  <div id="key-status"></div>
+
+  <hr class="divider">
+
+  <div class="btn-row" style="margin-bottom: 14px;">
+    <button class="btn-toggle btn-on"  onclick="sendAll(5)" style="padding:18px 8px;">🟢 เปิดทั้งหมด</button>
+    <button class="btn-toggle btn-off" onclick="sendAll(0)" style="padding:18px 8px;">🔴 ปิดทั้งหมด</button>
+  </div>
+  <div id="all-progress" style="text-align:center; font-size:12px; color:#f5a623; min-height:16px; margin-bottom: 10px;"></div>
+
+  <hr class="divider">
+
+  <!-- Relay 1 -->
+  <div class="relay-card">
+    <div class="relay-header">
+      <span class="relay-name">🔌 Relay 1</span>
+      <span class="relay-field">field4</span>
+      <span class="relay-state state-idle" id="state-4">—</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn-toggle btn-on"  onclick="sendData(4, 5)">✅ เปิด</button>
+      <button class="btn-toggle btn-off" onclick="sendData(4, 0)">⛔ ปิด</button>
+    </div>
+  </div>
+
+  <!-- Relay 2 -->
+  <div class="relay-card">
+    <div class="relay-header">
+      <span class="relay-name">🔌 Relay 2</span>
+      <span class="relay-field">field5</span>
+      <span class="relay-state state-idle" id="state-5">—</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn-toggle btn-on"  onclick="sendData(5, 5)">✅ เปิด</button>
+      <button class="btn-toggle btn-off" onclick="sendData(5, 0)">⛔ ปิด</button>
+    </div>
+  </div>
+
+  <!-- Relay 3 -->
+  <div class="relay-card">
+    <div class="relay-header">
+      <span class="relay-name">🔌 Relay 3</span>
+      <span class="relay-field">field6</span>
+      <span class="relay-state state-idle" id="state-6">—</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn-toggle btn-on"  onclick="sendData(6, 5)">✅ เปิด</button>
+      <button class="btn-toggle btn-off" onclick="sendData(6, 0)">⛔ ปิด</button>
+    </div>
+  </div>
+
+  <!-- Relay 4 -->
+  <div class="relay-card">
+    <div class="relay-header">
+      <span class="relay-name">🔌 Relay 4</span>
+      <span class="relay-field">field7</span>
+      <span class="relay-state state-idle" id="state-7">—</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn-toggle btn-on"  onclick="sendData(7, 5)">✅ เปิด</button>
+      <button class="btn-toggle btn-off" onclick="sendData(7, 0)">⛔ ปิด</button>
+    </div>
+  </div>
+
+  <div id="status"></div>
+
+<script>
+  const KEY_STORAGE = "ts_write_key";
+
+  window.onload = function () {
+    const saved = localStorage.getItem(KEY_STORAGE);
+    if (saved) {
+      document.getElementById("apikey").value = saved;
+      document.getElementById("key-status").innerText = "✅ ใช้ key ที่บันทึกไว้";
+    }
+  };
+
+  function saveKey() {
+    const key = document.getElementById("apikey").value.trim();
+    if (!key) { document.getElementById("key-status").innerText = "❌ กรุณาใส่ API Key"; return; }
+    localStorage.setItem(KEY_STORAGE, key);
+    document.getElementById("key-status").innerText = "✅ บันทึก Key แล้ว";
+  }
+
+  function sendData(fieldNum, value) {
+    const key = document.getElementById("apikey").value.trim();
+    if (!key) { setStatus("❌ กรุณาใส่ Write API Key", "#f85149"); return; }
+
+    setStatus("กำลังส่ง...", "#aaa");
+
+    fetch(`https://api.thingspeak.com/update?api_key=${key}&field${fieldNum}=${value}`)
+      .then(r => r.text())
+      .then(res => {
+        const time = new Date().toLocaleTimeString('th-TH');
+        if (res === "0") {
+          setStatus("❌ ส่งไม่สำเร็จ (รอ 15 วิแล้วลองใหม่)", "#f85149");
+        } else {
+          const action = value === 5 ? "เปิด ✅" : "ปิด ⛔";
+          setStatus(`✅ [${time}] field${fieldNum} ${action} สำเร็จ! Entry: ${res}`, "#73bf69");
+          updateState(fieldNum, value);
+        }
+      })
+      .catch(e => setStatus("❌ Error: " + e, "#f85149"));
+  }
+
+  function updateState(fieldNum, value) {
+    const el = document.getElementById("state-" + fieldNum);
+    if (value === 5) {
+      el.innerText = "🟢 เปิดอยู่";
+      el.className = "relay-state state-on";
+    } else {
+      el.innerText = "🔴 ปิดอยู่";
+      el.className = "relay-state state-off";
+    }
+  }
+
+  function setStatus(msg, color) {
+    const el = document.getElementById("status");
+    el.innerText = msg;
+    el.style.color = color;
+  }
+
+  // ส่งทั้ง 4 field พร้อมกัน (เว้น 16 วิ ต่อตัว เพราะ ThingSpeak limit 15 วิ)
+  let allButtonsLocked = false;
+  function sendAll(value) {
+    if (allButtonsLocked) {
+      setAllProgress("⏳ กำลังส่งอยู่ กรุณารอให้เสร็จก่อน", "#f5a623");
+      return;
+    }
+    const key = document.getElementById("apikey").value.trim();
+    if (!key) { setStatus("❌ กรุณาใส่ Write API Key", "#f85149"); return; }
+
+    const fields = [4, 5, 6, 7];
+    const actionLabel = value === 5 ? "เปิดทั้งหมด 🟢" : "ปิดทั้งหมด 🔴";
+    allButtonsLocked = true;
+    setAllProgress(`🚀 เริ่ม ${actionLabel}...`, "#f5a623");
+
+    fields.forEach((fieldNum, i) => {
+      setTimeout(() => {
+        fetch(`https://api.thingspeak.com/update?api_key=${key}&field${fieldNum}=${value}`)
+          .then(r => r.text())
+          .then(res => {
+            const time = new Date().toLocaleTimeString('th-TH');
+            if (res === "0") {
+              setAllProgress(`❌ [${time}] field${fieldNum} ส่งไม่สำเร็จ`, "#f85149");
+            } else {
+              setAllProgress(`✅ [${time}] field${fieldNum} (${i+1}/${fields.length}) สำเร็จ`, "#73bf69");
+              updateState(fieldNum, value);
+            }
+            if (i === fields.length - 1) {
+              allButtonsLocked = false;
+              setTimeout(() => setAllProgress(`✅ ${actionLabel} เสร็จสมบูรณ์!`, "#73bf69"), 500);
+            }
+          })
+          .catch(e => {
+            setAllProgress(`❌ Error field${fieldNum}: ${e}`, "#f85149");
+            if (i === fields.length - 1) allButtonsLocked = false;
+          });
+      }, i * 16000); // เว้น 16 วินาทีต่อ field
+    });
+  }
+
+  function setAllProgress(msg, color) {
+    const el = document.getElementById("all-progress");
+    el.innerText = msg;
+    el.style.color = color;
+  }
+</script>
+</body>
+</html>

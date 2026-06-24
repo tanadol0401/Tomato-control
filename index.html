@@ -95,24 +95,16 @@
 
   <hr class="divider">
 
-  <div class="btn-row" style="margin-bottom: 14px;">
-    <button class="btn-toggle btn-on"  onclick="sendAll(5)" style="padding:18px 8px;">🟢 เปิดทั้งหมด</button>
-    <button class="btn-toggle btn-off" onclick="sendAll(0)" style="padding:18px 8px;">🔴 ปิดทั้งหมด</button>
-  </div>
-  <div id="all-progress" style="text-align:center; font-size:12px; color:#f5a623; min-height:16px; margin-bottom: 10px;"></div>
-
-  <hr class="divider">
-
   <!-- Relay 1 -->
   <div class="relay-card">
     <div class="relay-header">
       <span class="relay-name">🔌 Relay 1</span>
-      <span class="relay-field">field4</span>
+      <span class="relay-field">field4 </span>
       <span class="relay-state state-idle" id="state-4">—</span>
     </div>
     <div class="btn-row">
       <button class="btn-toggle btn-on"  onclick="sendData(4, 5)">✅ เปิด</button>
-      <button class="btn-toggle btn-off" onclick="sendData(4, 0)">⛔ ปิด</button>
+      <button class="btn-toggle btn-off" onclick="sendData(5, 0)">⛔ ปิด</button>
     </div>
   </div>
 
@@ -125,14 +117,14 @@
     </div>
     <div class="btn-row">
       <button class="btn-toggle btn-on"  onclick="sendData(5, 5)">✅ เปิด</button>
-      <button class="btn-toggle btn-off" onclick="sendData(5, 0)">⛔ ปิด</button>
+      <button class="btn-toggle btn-off" onclick="sendData(4, 0)">⛔ ปิด</button>
     </div>
   </div>
 
   <!-- Relay 3 -->
   <div class="relay-card">
     <div class="relay-header">
-      <span class="relay-name">🔌 Relay 3</span>
+      <span class="relay-name">🔌 Relay 3 (พ่นหมอก)</span>
       <span class="relay-field">field6</span>
       <span class="relay-state state-idle" id="state-6">—</span>
     </div>
@@ -145,7 +137,7 @@
   <!-- Relay 4 -->
   <div class="relay-card">
     <div class="relay-header">
-      <span class="relay-name">🔌 Relay 4</span>
+      <span class="relay-name">🔌Relay 4 (ปั๊มน้ำ) </span>
       <span class="relay-field">field7</span>
       <span class="relay-state state-idle" id="state-7">—</span>
     </div>
@@ -209,44 +201,6 @@
 
   function setStatus(msg, color) {
     const el = document.getElementById("status");
-    el.innerText = msg;
-    el.style.color = color;
-  }
-
-  // ส่งทั้ง 4 field พร้อมกันใน 1 request เดียว (เร็ว ~1 วิ)
-  let allButtonsLocked = false;
-  function sendAll(value) {
-    if (allButtonsLocked) {
-      setAllProgress("⏳ กำลังส่งอยู่ กรุณารอให้เสร็จก่อน", "#f5a623");
-      return;
-    }
-    const key = document.getElementById("apikey").value.trim();
-    if (!key) { setStatus("❌ กรุณาใส่ Write API Key", "#f85149"); return; }
-
-    const actionLabel = value === 5 ? "เปิดทั้งหมด 🟢" : "ปิดทั้งหมด 🔴";
-    allButtonsLocked = true;
-    setAllProgress(`🚀 กำลัง ${actionLabel}...`, "#f5a623");
-
-    fetch(`https://api.thingspeak.com/update?api_key=${key}&field4=${value}&field5=${value}&field6=${value}&field7=${value}`)
-      .then(r => r.text())
-      .then(res => {
-        const time = new Date().toLocaleTimeString('th-TH');
-        allButtonsLocked = false;
-        if (res === "0") {
-          setAllProgress(`❌ [${time}] ส่งไม่สำเร็จ (รอ 15 วิแล้วลองใหม่)`, "#f85149");
-        } else {
-          setAllProgress(`✅ [${time}] ${actionLabel} สำเร็จทั้ง 4 relay! Entry: ${res}`, "#73bf69");
-          [4, 5, 6, 7].forEach(f => updateState(f, value));
-        }
-      })
-      .catch(e => {
-        allButtonsLocked = false;
-        setAllProgress(`❌ Error: ${e}`, "#f85149");
-      });
-  }
-
-  function setAllProgress(msg, color) {
-    const el = document.getElementById("all-progress");
     el.innerText = msg;
     el.style.color = color;
   }
